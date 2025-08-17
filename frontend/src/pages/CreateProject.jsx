@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { projectAPI } from "../api";
+import { canManageProject } from "../utils/permissions";
 import "../styles/Auth.css";
 
 const CreateProject = () => {
@@ -10,8 +11,15 @@ const CreateProject = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
 
   const navigate = useNavigate();
+
+  // Get current user on component mount
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setCurrentUser(user);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,6 +42,11 @@ const CreateProject = () => {
       setLoading(false);
     }
   };
+
+  // Show loading if user data not loaded yet
+  if (!currentUser) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="auth-container">

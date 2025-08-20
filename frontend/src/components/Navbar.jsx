@@ -14,6 +14,9 @@ const Navbar = ({ user, onLogout }) => {
               <Link to="/dashboard" className="nav-link">
                 Dashboard
               </Link>
+              <Link to="/team" className="nav-link">
+                Team
+              </Link>
               <Link to="/create-project" className="nav-link">
                 New Project
               </Link>

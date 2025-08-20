@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import CreateProject from './pages/CreateProject';
+import TeamManagement from './pages/TeamManagement';
 import './styles/App.css';
 
 function App() {
@@ -82,6 +83,14 @@ function App() {
               element={
                 <ProtectedRoute user={user}>
                   <ProjectDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/team" 
+              element={
+                <ProtectedRoute user={user}>
+                  <TeamManagement />
                 </ProtectedRoute>
               } 
             />

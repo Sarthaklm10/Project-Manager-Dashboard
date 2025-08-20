@@ -9,7 +9,7 @@ const fetchWithAuth = async (url, options = {}) => {
   const config = {
     headers: {
       "Content-Type": "application/json",
-      ...(token && { "x-auth-token": token }),
+      ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
     ...options,
@@ -112,6 +112,11 @@ export const taskAPI = {
       method: "PUT",
       body: JSON.stringify({ completed }),
     }),
+};
+
+// User API functions
+export const userAPI = {
+  getAll: () => fetchWithAuth("/auth/users"),
 };
 
 // Team management

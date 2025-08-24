@@ -7,7 +7,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 import CreateProject from './pages/CreateProject';
-import TeamManagement from './pages/TeamManagement';
+import Teams from './pages/Teams';
+
 import './styles/App.css';
 
 function App() {
@@ -87,13 +88,14 @@ function App() {
               } 
             />
             <Route 
-              path="/team" 
+              path="/teams" 
               element={
                 <ProtectedRoute user={user}>
-                  <TeamManagement />
+                  <Teams />
                 </ProtectedRoute>
               } 
             />
+            
             
             {/* Default redirect */}
             <Route 

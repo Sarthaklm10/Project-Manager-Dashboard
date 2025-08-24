@@ -172,6 +172,19 @@ const getTeamMembers = async (req, res) => {
   }
 };
 
+const getProjectsWithTeams = async (req, res) => {
+  try {
+    const projects = await Project.find({
+      $or: [{ leader: req.user.id }, { "team.user": req.user.id }],
+    })
+      .populate("leader", "name")
+      .populate("team.user", "name email role");
+    res.json(projects);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getProjects,
   getProject,
@@ -181,4 +194,5 @@ module.exports = {
   addTeamMember,
   removeTeamMember,
   getTeamMembers,
+  getProjectsWithTeams,
 };

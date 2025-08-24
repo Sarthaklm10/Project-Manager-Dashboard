@@ -1,41 +1,29 @@
-import { useState, useEffect } from "react";
-import { teamAPI } from "../api";
-import "../styles/TeamManagement.css";
+import { useState, useEffect } from 'react';
+import { teamAPI, userAPI } from '../api';
+import '../styles/TeamManagement.css';
 
-const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
+const TeamManagement = ({ projectId, isOwner }) => {
   const [team, setTeam] = useState([]);
-  const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [allUsers, setAllUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
 
   useEffect(() => {
-    loadTeam();
+    if (projectId) {
+      fetchTeamAndUsers();
+    }
   }, [projectId]);
 
-  const loadTeam = async () => {
+  const fetchTeamAndUsers = async () => {
     try {
-      const teamData = await teamAPI.getTeam(projectId);
+      setLoading(true);
+      const [teamData, usersData] = await Promise.all([
+        teamAPI.getTeam(projectId),
+        userAPI.getAll(),
+      ]);
       setTeam(teamData);
-    } catch (err) {
-      setError("Failed to load team members");
-    }
-  };
-
-  const handleAddMember = async (e) => {
-    e.preventDefault();
-    if (!newMemberEmail.trim()) return;
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await teamAPI.addMember(projectId, newMemberEmail);
-      setNewMemberEmail("");
-      setSuccess("Team member added successfully!");
-      loadTeam(); // Reload team data
-      if (onTeamUpdate) onTeamUpdate();
+      setAllUsers(usersData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,55 +31,74 @@ const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
     }
   };
 
-  const handleRemoveMember = async (userId) => {
-    if (!window.confirm("Are you sure you want to remove this team member?"))
-      return;
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    if (!newUserEmail.trim()) return;
 
     try {
-      await teamAPI.removeMember(projectId, userId);
-      setSuccess("Team member removed successfully!");
-      loadTeam(); // Reload team data
-      if (onTeamUpdate) onTeamUpdate();
+      await teamAPI.addMember(projectId, newUserEmail);
+      setNewUserEmail('');
+      fetchTeamAndUsers(); // Refresh team
     } catch (err) {
       setError(err.message);
     }
   };
 
+  const handleRemoveMember = async (userId) => {
+    if (window.confirm('Are you sure you want to remove this member?')) {
+      try {
+        await teamAPI.removeMember(projectId, userId);
+        fetchTeamAndUsers(); // Refresh team
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="loading">Loading team...</div>;
+  }
+
   return (
-    <div className="team-management">
-      <h3>Team Management</h3>
-
-      {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
-
-      {isOwner && (
-        <form onSubmit={handleAddMember} className="add-member-form">
-          <div className="form-group">
+    <div className="team-management-container">
+      <div className="team-management-header">
+        <h2>Team Members</h2>
+        {isOwner && (
+          <form onSubmit={handleAddMember} className="add-member-form">
             <input
               type="email"
-              value={newMemberEmail}
-              onChange={(e) => setNewMemberEmail(e.target.value)}
-              placeholder="Enter member's email"
-              className="form-input"
+              value={newUserEmail}
+              onChange={(e) => setNewUserEmail(e.target.value)}
+              placeholder="Enter user's email"
+              className="add-member-input"
               required
             />
-            <button type="submit" className="add-member-btn" disabled={loading}>
-              {loading ? "Adding..." : "Add Member"}
+            <button type="submit" className="add-member-btn">
+              Add Member
             </button>
-          </div>
-        </form>
+          </form>
+        )}
+      </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+          <button onClick={() => setError('')} className="close-error">
+            ×
+          </button>
+        </div>
       )}
 
-      <div className="team-list">
+      <div className="team-members-grid">
         {team && team.length > 0 ? (
           team.map((member) => (
-            <div key={member.user._id} className="team-member">
-              <span className="member-name">{member.user.name}</span>
+            <div key={member.user._id} className="team-member-card">
               <div className="member-details">
-                <span className="member-email">{member.user.email}</span>
-                <span className="member-role">{member.role}</span>
+                <p className="member-name">{member.user.name}</p>
+                <p className="member-email">{member.user.email}</p>
+                <p className="member-role">{member.role}</p>
               </div>
-              {isOwner && member.role !== "leader" && (
+              {isOwner && (
                 <button
                   onClick={() => handleRemoveMember(member.user._id)}
                   className="remove-member-btn"
@@ -102,7 +109,9 @@ const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
             </div>
           ))
         ) : (
-          <p className="no-members">No team members yet</p>
+          <div className="no-members">
+            <p>No team members yet.</p>
+          </div>
         )}
       </div>
     </div>

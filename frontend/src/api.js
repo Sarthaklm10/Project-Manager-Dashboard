@@ -66,6 +66,8 @@ export const authAPI = {
 export const projectAPI = {
   getAll: () => fetchWithAuth("/projects"),
 
+  getAllWithTeams: () => fetchWithAuth("/projects/teams"),
+
   getById: (id) => fetchWithAuth(`/projects/${id}`),
 
   create: (projectData) =>

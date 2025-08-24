@@ -9,6 +9,7 @@ const {
   addTeamMember,
   removeTeamMember,
   getTeamMembers,
+  getProjectsWithTeams,
 } = require("../controllers/projectController.js");
 
 const router = express.Router();
@@ -18,9 +19,10 @@ router.use(protect);
 
 router.post("/", createProject);
 router.get("/", getProjects);
+router.get("/teams", getProjectsWithTeams);
 router.get("/:id", getProject);
 router.put("/:id", updateProject);
-router.delete("/:id", deleteProject);
+delete("/:id", deleteProject);
 
 // Team management routes
 router.post("/:id/team", addTeamMember);

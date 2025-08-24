@@ -9,18 +9,24 @@ const projectSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    owner: {
+    leader: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    teamMembers: [
+    team: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        role: {
+          type: String,
+          enum: ['leader', 'member'],
+          default: 'member',
+        },
       },
     ],
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );

@@ -3,7 +3,7 @@ import { teamAPI } from "../api";
 import "../styles/TeamManagement.css";
 
 const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
-  const [team, setTeam] = useState({ owner: null, teamMembers: [] });
+  const [team, setTeam] = useState([]);
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -64,7 +64,6 @@ const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
-      {/* Add new member form - only for owners */}
       {isOwner && (
         <form onSubmit={handleAddMember} className="add-member-form">
           <div className="form-group">
@@ -83,28 +82,18 @@ const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
         </form>
       )}
 
-      {/* Team members list */}
       <div className="team-list">
-        <h4>Project Owner</h4>
-        {team.owner && (
-          <div className="team-member owner">
-            <span className="member-name">{team.owner.name}</span>
-            <span className="member-email">{team.owner.email}</span>
-            <span className="owner-badge">👑 Owner</span>
-          </div>
-        )}
-
-        <h4>Team Members ({team.teamMembers.length})</h4>
-        {team.teamMembers.length === 0 ? (
-          <p className="no-members">No team members yet</p>
-        ) : (
-          team.teamMembers.map((member) => (
-            <div key={member._id} className="team-member">
-              <span className="member-name">{member.name}</span>
-              <span className="member-email">{member.email}</span>
-              {isOwner && (
+        {team && team.length > 0 ? (
+          team.map((member) => (
+            <div key={member.user._id} className="team-member">
+              <span className="member-name">{member.user.name}</span>
+              <div className="member-details">
+                <span className="member-email">{member.user.email}</span>
+                <span className="member-role">{member.role}</span>
+              </div>
+              {isOwner && member.role !== "leader" && (
                 <button
-                  onClick={() => handleRemoveMember(member._id)}
+                  onClick={() => handleRemoveMember(member.user._id)}
                   className="remove-member-btn"
                 >
                   Remove
@@ -112,6 +101,8 @@ const TeamManagement = ({ projectId, isOwner, onTeamUpdate }) => {
               )}
             </div>
           ))
+        ) : (
+          <p className="no-members">No team members yet</p>
         )}
       </div>
     </div>

@@ -17,38 +17,55 @@
   color: #333;
 }
 
-.users-list {
+.team-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
 }
 
-.user-card {
+.team-member {
   background-color: #fff;
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.user-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-info {
   display: flex;
   flex-direction: column;
 }
 
-.user-name {
+.team-member:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+.member-name {
   font-size: 1.2rem;
   font-weight: 600;
   color: #333;
   margin-bottom: 0.5rem;
 }
 
-.user-email {
+.member-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.member-email {
   font-size: 0.9rem;
   color: #666;
+}
+
+.member-role {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #3b82f6;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.remove-member-btn {
+  margin-top: 1rem;
+  align-self: flex-end;
 }

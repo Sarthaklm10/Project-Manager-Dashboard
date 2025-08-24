@@ -1,22 +1,24 @@
 
 import { useState, useEffect } from 'react';
-import { userAPI } from '../api';
+import { teamAPI } from '../api';
 import '../styles/TeamManagement.css';
 
-const TeamManagement = () => {
-  const [users, setUsers] = useState([]);
+const TeamManagement = ({ projectId }) => {
+  const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (projectId) {
+      fetchTeam();
+    }
+  }, [projectId]);
 
-  const fetchUsers = async () => {
+  const fetchTeam = async () => {
     try {
       setLoading(true);
-      const data = await userAPI.getAll();
-      setUsers(data);
+      const data = await teamAPI.getTeam(projectId);
+      setTeam(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -25,7 +27,7 @@ const TeamManagement = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading users...</div>;
+    return <div className="loading">Loading team...</div>;
   }
 
   return (
@@ -42,14 +44,19 @@ const TeamManagement = () => {
       )}
 
       <div className="users-list">
-        {users.map(user => (
-          <div key={user._id} className="user-card">
-            <div className="user-info">
-              <span className="user-name">{user.name}</span>
-              <span className="user-email">{user.email}</span>
+        {team && team.length > 0 ? (
+          team.map(member => (
+            <div key={member.user._id} className="user-card">
+              <div className="user-info">
+                <span className="user-name">{member.user.name}</span>
+                <span className="user-role">{member.role}</span>
+                <span className="user-email">{member.user.email}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No team members yet.</p>
+        )}
       </div>
     </div>
   );

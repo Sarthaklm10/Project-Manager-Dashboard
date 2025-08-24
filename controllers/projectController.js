@@ -3,7 +3,9 @@ const User = require("../models/User.js"); // Added for team management
 
 const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find({ owner: req.user.id });
+    const projects = await Project.find({
+      $or: [{ leader: req.user.id }, { "team.user": req.user.id }],
+    }).populate("leader", "name");
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -12,10 +14,10 @@ const getProjects = async (req, res) => {
 
 const getProject = async (req, res) => {
   try {
-    const project = await Project.findOne({
-      _id: req.params.id,
-      owner: req.user.id,
-    });
+    const project = await Project.findById(req.params.id)
+      .populate("leader", "name email")
+      .populate("team.user", "name email role");
+
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
@@ -32,8 +34,8 @@ const createProject = async (req, res) => {
     const project = await Project.create({
       name,
       description,
-      owner: req.user.id,
-      user: req.user.id,
+      leader: req.user.id,
+      team: [{ user: req.user.id, role: 'leader' }]
     });
 
     res.status(201).json(project);
@@ -48,7 +50,7 @@ const updateProject = async (req, res) => {
 
     const project = await Project.findOne({
       _id: req.params.id,
-      owner: req.user.id,
+      leader: req.user.id,
     });
 
     if (!project) {
@@ -69,7 +71,7 @@ const deleteProject = async (req, res) => {
   try {
     const project = await Project.findOne({
       _id: req.params.id,
-      owner: req.user.id,
+      leader: req.user.id,
     });
 
     if (!project) {
@@ -87,60 +89,34 @@ const deleteProject = async (req, res) => {
 const addTeamMember = async (req, res) => {
   try {
     const { id } = req.params;
-    const { email } = req.body;
+    const { email, role } = req.body;
 
     const project = await Project.findById(id);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // Debug: Log what we found
-    console.log("Project found:", {
-      id: project._id,
-      owner: project.owner,
-      user: project.user,
-      hasOwner: !!project.owner,
-    });
-
-    // Check if project has an owner
-    if (!project.owner) {
-      return res.status(400).json({
-        message: "Project has no owner. Please recreate the project.",
-      });
-    }
-
-    // Check if user is project owner
-    if (project.owner.toString() !== req.user.id) {
+    if (project.leader.toString() !== req.user.id) {
       return res
         .status(403)
-        .json({ message: "Only project owner can add team members" });
+        .json({ message: "Only project leader can add team members" });
     }
 
-    // Find user by email
     const userToAdd = await User.findOne({ email });
     if (!userToAdd) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user is already a team member
-    if (project.teamMembers.includes(userToAdd._id)) {
+    if (project.team.some(member => member.user.toString() === userToAdd._id.toString())) {
       return res.status(400).json({ message: "User is already a team member" });
     }
 
-    // Check if user is the owner
-    if (userToAdd._id.toString() === project.owner.toString()) {
-      return res
-        .status(400)
-        .json({ message: "Owner is already part of the project" });
-    }
-
-    // Add user to team
-    project.teamMembers.push(userToAdd._id);
+    project.team.push({ user: userToAdd._id, role: role || 'member' });
     await project.save();
 
     res.json({
       message: "Team member added successfully",
-      teamMember: userToAdd,
+      teamMember: { user: userToAdd, role: role || 'member' },
     });
   } catch (error) {
     console.error("Error in addTeamMember:", error);
@@ -158,21 +134,18 @@ const removeTeamMember = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // Check if user is project owner
-    if (project.owner.toString() !== req.user.id) {
+    if (project.leader.toString() !== req.user.id) {
       return res
         .status(403)
-        .json({ message: "Only project owner can remove team members" });
+        .json({ message: "Only project leader can remove team members" });
     }
 
-    // Check if user is trying to remove themselves (owner)
-    if (userId === project.owner.toString()) {
-      return res.status(400).json({ message: "Cannot remove project owner" });
+    if (userId === project.leader.toString()) {
+      return res.status(400).json({ message: "Cannot remove project leader" });
     }
 
-    // Remove user from team
-    project.teamMembers = project.teamMembers.filter(
-      (memberId) => memberId.toString() !== userId
+    project.team = project.team.filter(
+      (member) => member.user.toString() !== userId
     );
     await project.save();
 
@@ -187,18 +160,13 @@ const getTeamMembers = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const project = await Project.findById(id)
-      .populate("owner", "name email")
-      .populate("teamMembers", "name email");
+    const project = await Project.findById(id).populate("team.user", "name email role");
 
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    res.json({
-      owner: project.owner,
-      teamMembers: project.teamMembers,
-    });
+    res.json(project.team);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

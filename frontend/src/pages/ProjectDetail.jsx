@@ -126,14 +126,8 @@ const ProjectDetail = () => {
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
   // Check if current user can manage this project
-  const canManage =
-    project && currentUser
-      ? canManageProject(currentUser._id, project.owner)
-      : false;
-  const isOwner =
-    project && currentUser
-      ? isProjectOwner(currentUser._id, project.owner)
-      : false;
+  const canManage = project?.leader && currentUser ? canManageProject(currentUser._id, project.leader._id) : false;
+  const isOwner = project?.leader && currentUser ? isProjectOwner(currentUser._id, project.leader._id) : false;
 
   return (
     <div className="project-detail">

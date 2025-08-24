@@ -3,10 +3,13 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .project-header {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .back-link {
@@ -37,7 +40,8 @@
 
 .project-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
+  align-items: center;
 }
 
 .edit-btn {
@@ -68,6 +72,17 @@
 
 .delete-btn:hover {
   background: #b91c1c;
+}
+
+.owner-badge {
+    background-color: #f3f4f6;
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Edit Project Form */
@@ -204,20 +219,22 @@
 .tasks-container {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 40px;
 }
 
 .task-group h3 {
   color: #374151;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   font-size: 1.2rem;
   font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 10px;
 }
 
 .tasks-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 /* Task Item */
@@ -227,14 +244,17 @@
   justify-content: space-between;
   padding: 16px 20px;
   background: #f9fafb;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .task-item:hover {
   border-color: #d1d5db;
   background: #f3f4f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .task-item.completed {
@@ -246,7 +266,7 @@
 .task-content {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex: 1;
 }
 
@@ -334,6 +354,7 @@
 @media (max-width: 768px) {
   .project-detail {
     padding: 30px 15px;
+    gap: 30px;
   }
   
   .project-info h1 {
@@ -342,6 +363,7 @@
   
   .project-actions {
     flex-direction: column;
+    align-items: flex-start;
   }
   
   .edit-btn,
